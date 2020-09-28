@@ -9,9 +9,9 @@ axios.defaults.baseURL = "http://127.0.0.1:8000/";
 // http request 拦截器
 axios.interceptors.request.use(
   config => {
-    // if (store.state.login.loginToken) {
-    //   config.headers.Authorization = store.getters.getLoginToken;
-    // }
+    if (store.state.login.loginToken) {
+      config.headers.Authorization = store.getters.getLoginToken;
+    }
     // if (Object.prototype.toString.call(config.data) != "[object FormData]") {
     //   if (config.method == "post") {
     //     config.data = qs.stringify(config.data);
@@ -31,52 +31,83 @@ axios.interceptors.request.use(
   }
 );
 
+// // 请求拦截器
+// service.interceptors.request.use(
+//   config => {
+//     // 在请求发送之前做一些处理
+
+//     const token = util.cookies.get('token')
+//     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
+//     config.headers['X-Token'] = token
+//     return config
+//   },
+//   error => {
+//     // 发送失败
+//     console.log(error)
+//     return Promise.reject(error)
+//   }
+// )
+
 // http response 拦截器   注意完善
 axios.interceptors.response.use(
   response => {
-    console.log(111, response);
     const dataAxios = response.data;
-    const status = response.status;
-    if (status === undefined) {
-      router.replace({
-        path: "/login",
-        query: { redirect: router.currentRoute.fullPath }
-      });
-      store.commit("clearLoginUserInfo");
+    const { ret, data } = dataAxios;
+    const { code } = ret;
+    console.log(dataAxios, code);
+    if (code === undefined) {
+      return dataAxios;
     } else {
-      switch (status) {
+      switch (code) {
         case 200:
-          // 请求正确
-          return dataAxios;
-        case 407:
-          // 无权限
-          router.replace({
-            path: "/login",
-            query: { redirect: router.currentRoute.fullPath }
-          });
-          store.commit("clearLoginUserInfo");
-          return Promise.reject(dataAxios);
+          return data;
         default:
-          return Promise.reject(dataAxios);
+          return Promise.reject(ret);
       }
     }
   },
   error => {
-    if (error.response == undefined) {
-      router.replace({
-        path: "/login",
-        query: { redirect: router.currentRoute.fullPath }
-      });
-      store.commit("clearLoginUserInfo");
-    } else {
+    if (error && error.response) {
       switch (error.response.status) {
         case 400:
-          console.log(11, error.response);
+          error.message = "请求错误";
+          break;
+        case 401:
+          router.replace({
+            path: "/login",
+            query: { redirect: router.currentRoute.fullPath }
+          });
+          break;
+        case 403:
+          error.message = "拒绝访问";
           break;
         case 404:
+          error.message = `请求地址出错: ${error.response.config.url}`;
+          break;
+        case 408:
+          error.message = "请求超时";
+          break;
+        case 500:
+          error.message = "服务器内部错误";
+          break;
+        case 501:
+          error.message = "服务未实现";
+          break;
+        case 502:
+          error.message = "网关错误";
+          break;
+        case 503:
+          error.message = "服务不可用";
+          break;
+        case 504:
+          error.message = "网关超时";
+          break;
+        case 505:
+          error.message = "HTTP版本不受支持";
+          break;
+        default:
           break;
       }
-      return Promise.reject(error.response);
     }
   }
 );

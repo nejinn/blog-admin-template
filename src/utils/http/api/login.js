@@ -6,10 +6,13 @@ export default {
     const url = urlList.getLoginUrl;
     http.nlyPost(url, data).then(
       response => {
-        console.log(response);
+        const { token } = response;
+        obj.$store.commit("setLoginUserInfo", token);
+        obj.$router.push(obj.$route.query.redirect || "/");
       },
       err => {
-        console.log(err);
+        const { msg } = err;
+        obj.loginBoxMsg = msg;
       }
     );
   }

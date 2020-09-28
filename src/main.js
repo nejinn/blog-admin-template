@@ -21,6 +21,23 @@ Vue.prototype.$renderContext = RenderContext;
 
 Vue.config.productionTip = false;
 
+router.beforeEach((to, from, next) => {
+  if (to.meta.login) {
+    // 判断跳转的路由是否需要登录
+    if (store.state.login.loginToken) {
+      // vuex.state判断token是否存在
+      next(); // 已登录
+    } else {
+      next({
+        path: "/login",
+        query: { redirect: to.fullPath } // 将跳转的路由path作为参数，登录成功后跳转到该路由
+      });
+    }
+  } else {
+    next();
+  }
+});
+
 new Vue({
   router,
   store,

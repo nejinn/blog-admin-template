@@ -16,7 +16,7 @@
       </div>
       <nly-card>
         <nly-card-body class="login-card-body">
-          <p class="login-box-msg">
+          <p :class="loginBoxMsgText">
             {{ this.loginBoxMsg }}
           </p>
           <nly-input-group class="mb-3">
@@ -100,7 +100,14 @@ export default {
     this.usernameInvalid = this.$renderContext.loginContext.usernameInvalid;
     this.loginBg = require("../../assets/static/login_bg.jpg");
   },
-  computed: {},
+  mounted() {},
+  computed: {
+    loginBoxMsgText() {
+      return this.loginBoxMsg != this.$renderContext.loginContext.loginBoxMsg
+        ? "login-box-msg text-danger"
+        : "login-box-msg";
+    }
+  },
   methods: {
     usernameCheck() {
       this.username.length > 0
@@ -108,7 +115,7 @@ export default {
         : (this.usernameState = "invalid");
     },
     passwordCheck() {
-      this.password.length > 6
+      this.password.length >= 6
         ? (this.passwordState = "valid")
         : (this.passwordState = "invalid");
     },
@@ -118,6 +125,26 @@ export default {
         password: this.password
       };
       const obj = this;
+      if (this.username === undefined || this.username.length === 0) {
+        const toastVnode = {
+          title: this.$renderContext.loginContext.loginError.title,
+          message: this.$renderContext.loginContext.loginError.usernameMsg,
+          content: this.$renderContext.loginContext.loginError.usernameContent,
+          variant: this.$renderContext.loginContext.loginError.variant
+        };
+        this.$toast(obj, toastVnode);
+        return;
+      }
+      if (this.password === undefined || this.password.length === 0) {
+        const toastVnode = {
+          title: this.$renderContext.loginContext.loginError.title,
+          message: this.$renderContext.loginContext.loginError.passwordMsg,
+          content: this.$renderContext.loginContext.loginError.passwordContent,
+          variant: this.$renderContext.loginContext.loginError.variant
+        };
+        this.$toast(obj, toastVnode);
+        return;
+      }
       this.$api.HttpsLogin.login(obj, loginData);
     }
   }
