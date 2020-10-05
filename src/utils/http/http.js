@@ -3,6 +3,8 @@ import store from "../../store";
 // import qs from "qs";
 import router from "../../router";
 
+import RenderContext from "../render-context/context";
+
 axios.defaults.timeout = 50000;
 axios.defaults.baseURL = "http://127.0.0.1:8000/";
 
@@ -10,7 +12,7 @@ axios.defaults.baseURL = "http://127.0.0.1:8000/";
 axios.interceptors.request.use(
   config => {
     if (store.state.login.loginToken) {
-      config.headers.Authorization = store.getters.getLoginToken;
+      config.headers.Authorization = `nly ${store.getters.getLoginToken}`;
     }
     // if (Object.prototype.toString.call(config.data) != "[object FormData]") {
     //   if (config.method == "post") {
@@ -31,30 +33,11 @@ axios.interceptors.request.use(
   }
 );
 
-// // 请求拦截器
-// service.interceptors.request.use(
-//   config => {
-//     // 在请求发送之前做一些处理
-
-//     const token = util.cookies.get('token')
-//     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
-//     config.headers['X-Token'] = token
-//     return config
-//   },
-//   error => {
-//     // 发送失败
-//     console.log(error)
-//     return Promise.reject(error)
-//   }
-// )
-
-// http response 拦截器   注意完善
 axios.interceptors.response.use(
   response => {
     const dataAxios = response.data;
     const { ret, data } = dataAxios;
     const { code } = ret;
-    console.log(dataAxios, code);
     if (code === undefined) {
       return dataAxios;
     } else {
@@ -67,47 +50,67 @@ axios.interceptors.response.use(
     }
   },
   error => {
+    const ret = {};
     if (error && error.response) {
+      const ret = {};
       switch (error.response.status) {
         case 400:
-          error.message = "请求错误";
-          break;
+          ret.code = 400;
+          ret.msg = "请求错误";
+          return Promise.reject(ret);
         case 401:
           router.replace({
             path: "/login",
             query: { redirect: router.currentRoute.fullPath }
           });
+          store.commit("clearLoginUserInfo");
           break;
         case 403:
-          error.message = "拒绝访问";
-          break;
+          ret.code = 403;
+          ret.msg = "没有权限";
+          return Promise.reject(ret);
         case 404:
-          error.message = `请求地址出错: ${error.response.config.url}`;
+          router.push({
+            path: "/404"
+          });
           break;
         case 408:
-          error.message = "请求超时";
-          break;
+          ret.code = 408;
+          ret.mssg = "请求超时";
+          return Promise.reject(ret);
         case 500:
-          error.message = "服务器内部错误";
-          break;
+          ret.code = 500;
+          ret.mssg = "服务器内部错误";
+          return Promise.reject(ret);
         case 501:
-          error.message = "服务未实现";
-          break;
+          ret.code = 501;
+          ret.mssg = "服务未实现";
+          return Promise.reject(ret);
         case 502:
-          error.message = "网关错误";
-          break;
+          ret.code = 502;
+          ret.mssg = "网关错误";
+          return Promise.reject(ret);
         case 503:
-          error.message = "服务不可用";
-          break;
+          ret.code = 503;
+          ret.mssg = "服务不可用";
+          return Promise.reject(ret);
         case 504:
-          error.message = "网关超时";
-          break;
+          ret.code = 504;
+          ret.mssg = "网关超时";
+          return Promise.reject(ret);
         case 505:
-          error.message = "HTTP版本不受支持";
-          break;
+          ret.code = 505;
+          ret.mssg = "HTTP版本不受支持";
+          return Promise.reject(ret);
         default:
-          break;
+          ret.code = 600;
+          ret.mssg = "未知错误";
+          return Promise.reject(ret);
       }
+    } else {
+      ret.code = 503;
+      ret.msg = "服务不可用";
+      return Promise.reject(ret);
     }
   }
 );
@@ -128,7 +131,7 @@ export default {
           params: params
         })
         .then(response => {
-          resolve(response.data);
+          resolve(response);
         })
         .catch(err => {
           reject(err);
@@ -148,7 +151,7 @@ export default {
       axios
         .get(url + id + "/")
         .then(response => {
-          resolve(response.data);
+          resolve(response);
         })
         .catch(err => {
           reject(err);
@@ -204,7 +207,7 @@ export default {
       axios
         .patch(url, data)
         .then(response => {
-          resolve(response.data);
+          resolve(response);
         })
         .catch(err => {
           reject(err);
@@ -224,7 +227,7 @@ export default {
       axios
         .put(url + id + "/", data)
         .then(response => {
-          resolve(response.data);
+          resolve(response);
         })
         .catch(err => {
           reject(err);
@@ -244,11 +247,26 @@ export default {
       axios
         .delete(url + id + "/")
         .then(response => {
-          resolve(response.data);
+          resolve(response);
         })
         .catch(err => {
           reject(err);
         });
     });
+  },
+  nlyCheckCode: function(obj, ret) {
+    const codeArray = [400, 403, 408, 500, 501, 502, 503, 504, 505, 600];
+    const { code, msg } = ret;
+    if (codeArray.indexOf(code) === -1) {
+      return false;
+    }
+    const toastVnode = {
+      title: RenderContext.httpContext.interceptorsErrorTilte,
+      message: msg,
+      content: code,
+      variant: RenderContext.httpContext.interceptorsVariant
+    };
+    obj.$toast(obj, toastVnode);
+    return true;
   }
 };

@@ -1,6 +1,9 @@
 export default {
   getLocalInfo: function(item) {
     // 获取localStorage数据
+    if (localStorage.getItem(item) === "undefined") {
+      return "";
+    }
     return localStorage.getItem(item)
       ? JSON.parse(localStorage.getItem(item))
       : "";

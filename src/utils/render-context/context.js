@@ -13,6 +13,10 @@ const renderContext = {
       passwordContent: "密码异常",
       variant: "danger"
     }
+  },
+  httpContext: {
+    interceptorsErrorTilte: "服务错误",
+    interceptorsVariant: "info"
   }
 };
 
