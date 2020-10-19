@@ -24,7 +24,8 @@ const routes = [
     component: TheContainer,
     redirect: "/home",
     meta: {
-      login: true
+      login: true,
+      title: "首页"
     },
     children: [
       {

@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import logo from "../../assets/static/NLYLOGO.png";
 export default {
   name: "TheSidebar",
   props: {
@@ -27,12 +26,14 @@ export default {
   },
   data() {
     return {
-      logo
+      logo: undefined
     };
+  },
+  created() {
+    this.logo = require("../../assets/static/img/NLYLOGO.png");
   },
   computed: {
     sidebarList() {
-      console.log(this.$route.path);
       const sidebarChildren = this.sidebar.map(item => {
         if (item.router && !item.children) {
           return {

@@ -14,7 +14,11 @@ Vue.use(NlyAdminlteVueIcons);
 import Toast from "./utils/toast";
 import Api from "./utils/http";
 import RenderContext from "./utils/render-context/context";
-import "./assets/custom.css";
+import "./assets/static/css/blog-icon/iconfont.css";
+import "./assets/static/css/font.css";
+import "./assets/static/css/blog-icon/iconfont.js";
+import "./assets/static/css/custom.css";
+
 Vue.prototype.$toast = Toast;
 Vue.prototype.$api = Api;
 Vue.prototype.$renderContext = RenderContext;

@@ -1,5 +1,5 @@
 <template>
-  <nly-wrapper-footer size="sm" bg-variant="info">
+  <nly-wrapper-footer size="sm" bg-variant="info" class="fixed-bottom">
     <strong>
       Copyright © 2020
       <a href="https://github.com/nejinn/nly-adminlte-vue">nly-adminlte-vue</a>.

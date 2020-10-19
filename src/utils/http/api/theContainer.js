@@ -1,5 +1,6 @@
 import http from "../http";
 import urlList from "./urlList";
+import RenderContext from "../../../utils/render-context/context";
 
 export default {
   userInfo: function(obj, data) {
@@ -12,9 +13,14 @@ export default {
       },
       err => {
         if (!http.nlyCheckCode(obj, err)) {
-          console.log(22, err);
-          // const { msg } = err;
-          // obj.loginBoxMsg = msg;
+          const { code, msg } = err;
+          const toastVnode = {
+            title: RenderContext.allUseContext.title,
+            message: msg,
+            content: code,
+            variant: RenderContext.allUseContext.variant
+          };
+          obj.$toast(obj, toastVnode);
         }
       }
     );
