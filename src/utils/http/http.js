@@ -52,7 +52,6 @@ axios.interceptors.response.use(
   error => {
     const ret = {};
     if (error && error.response) {
-      const ret = {};
       switch (error.response.status) {
         case 400:
           ret.code = 400;
@@ -64,7 +63,9 @@ axios.interceptors.response.use(
             query: { redirect: router.currentRoute.fullPath }
           });
           store.commit("clearLoginUserInfo");
-          break;
+          ret.code = 401;
+          ret.msg = "请重新登录";
+          return Promise.reject(ret);
         case 403:
           ret.code = 403;
           ret.msg = "没有权限";
@@ -73,41 +74,52 @@ axios.interceptors.response.use(
           router.push({
             path: "/404"
           });
-          break;
+          ret.code = 404;
+          ret.msg = "没有找到资源";
+          return Promise.reject(ret);
         case 408:
           ret.code = 408;
-          ret.mssg = "请求超时";
+          ret.msg = "请求超时";
           return Promise.reject(ret);
         case 500:
+          router.replace({
+            path: "/500"
+          });
           ret.code = 500;
-          ret.mssg = "服务器内部错误";
+          ret.msg = "服务器内部错误";
           return Promise.reject(ret);
         case 501:
           ret.code = 501;
-          ret.mssg = "服务未实现";
+          ret.msg = "服务未实现";
           return Promise.reject(ret);
         case 502:
           ret.code = 502;
-          ret.mssg = "网关错误";
+          ret.msg = "网关错误";
           return Promise.reject(ret);
         case 503:
+          router.replace({
+            path: "/500"
+          });
           ret.code = 503;
-          ret.mssg = "服务不可用";
+          ret.msg = "服务不可用";
           return Promise.reject(ret);
         case 504:
           ret.code = 504;
-          ret.mssg = "网关超时";
+          ret.msg = "网关超时";
           return Promise.reject(ret);
         case 505:
           ret.code = 505;
-          ret.mssg = "HTTP版本不受支持";
+          ret.msg = "HTTP版本不受支持";
           return Promise.reject(ret);
         default:
           ret.code = 600;
-          ret.mssg = "未知错误";
+          ret.msg = "未知错误";
           return Promise.reject(ret);
       }
     } else {
+      router.replace({
+        path: "/500"
+      });
       ret.code = 503;
       ret.msg = "服务不可用";
       return Promise.reject(ret);
@@ -234,6 +246,26 @@ export default {
         });
     });
   },
+  nlyUpDateNoId: function(url, data) {
+    /**
+     * 封装put请求，更新，修改数据，假删除数据等
+     * 带data
+     * demo url 127.0.0.1:8000/api/project/1/
+     * @param url
+     * @param data
+     * @returns {Promise}
+     */
+    return new Promise((resolve, reject) => {
+      axios
+        .put(url, data)
+        .then(response => {
+          resolve(response);
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  },
   nlyDelete: function(url, id) {
     /**
      * 封装delete请求，删除数据
@@ -257,8 +289,20 @@ export default {
   nlyCheckCode: function(obj, ret) {
     const codeArray = [400, 403, 408, 500, 501, 502, 503, 504, 505, 600];
     const { code, msg } = ret;
+
     if (codeArray.indexOf(code) === -1) {
-      return false;
+      const toastVnode = {
+        title: "操作失败",
+        message: msg,
+        content: code,
+        variant: "danger"
+      };
+      obj.$toast(obj, toastVnode);
+      return;
+    }
+
+    if (code === 401 || code === 404 || code === 500 || code === 503) {
+      return;
     }
     const toastVnode = {
       title: RenderContext.httpContext.interceptorsErrorTilte,
@@ -267,6 +311,6 @@ export default {
       variant: RenderContext.httpContext.interceptorsVariant
     };
     obj.$toast(obj, toastVnode);
-    return true;
+    return;
   }
 };

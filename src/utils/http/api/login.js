@@ -11,10 +11,9 @@ export default {
         obj.$router.push(obj.$route.query.redirect || "/");
       },
       err => {
-        if (!http.nlyCheckCode(obj, err)) {
-          const { msg } = err;
-          obj.loginBoxMsg = msg;
-        }
+        http.nlyCheckCode(obj, err);
+        const { msg } = err;
+        obj.loginBoxMsg = msg;
       }
     );
   }

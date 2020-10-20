@@ -98,7 +98,7 @@ export default {
   created() {
     this.loginBoxMsg = this.$renderContext.loginContext.loginBoxMsg;
     this.usernameInvalid = this.$renderContext.loginContext.usernameInvalid;
-    this.loginBg = require("../../assets/static/login_bg.jpg");
+    this.loginBg = require("../../assets/static/img/login_bg.jpg");
   },
   mounted() {},
   computed: {
