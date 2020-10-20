@@ -7,5 +7,6 @@ export default {
   deleteUser: `${ApiBaseUrl}user/delete/`,
   launchUser: `${ApiBaseUrl}user/launch/`,
   checkUsername: `${ApiBaseUrl}user/check-username/`,
-  editorUser: `${ApiBaseUrl}user/editor/`
+  editorUser: `${ApiBaseUrl}user/editor/`,
+  addUser: `${ApiBaseUrl}user/create/`
 };

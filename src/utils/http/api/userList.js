@@ -213,6 +213,29 @@ const checkUsername = (obj, data) => {
     },
     err => {
       http.nlyCheckCode(obj, err);
+      obj.feedback.usernameInvalid = err;
+      obj.valid.usernameState = "invalid";
+    }
+  );
+};
+
+const addCheckUsername = (obj, data) => {
+  const url = urlList.checkUsername;
+  http.nlyPost(url, data).then(
+    response => {
+      const { check_result, msg } = response;
+      if (check_result) {
+        obj.addFeedback.usernameInvalid = msg;
+        obj.addValid.usernameState = "invalid";
+      } else {
+        obj.addFeedback.usernameInvalid = "";
+        obj.addValid.usernameState = "novalid";
+      }
+    },
+    err => {
+      http.nlyCheckCode(obj, err);
+      obj.addFeedback.usernameInvalid = err;
+      obj.addValid.usernameState = "invalid";
     }
   );
 };
@@ -253,11 +276,51 @@ const editorUser = (obj, data) => {
     }
   );
 };
+
+const addUser = (obj, data) => {
+  const url = urlList.addUser;
+  http.nlyPost(url, data).then(
+    // eslint-disable-next-line no-unused-vars
+    response => {
+      obj.addModal = false;
+      obj.isClickAddOk = false;
+      const toastVnode = {
+        title: RenderContext.addUserContext.title,
+        message: RenderContext.addUserContext.message,
+        content: RenderContext.addUserContext.content,
+        variant: RenderContext.addUserContext.variant
+      };
+      obj.$toast(obj, toastVnode);
+
+      // this.currentPage = 1;
+      // const obj = this;
+      obj.isBusy = true;
+      const nextParams = {
+        size: obj.perPageSize,
+        page: obj.currentPage,
+        username__icontains: obj.filter.username,
+        user_type: obj.filter.usertype,
+        user_phone__icontains: obj.filter.userphone,
+        user_email__icontains: obj.filter.useremail,
+        is_delete: obj.filter.isdelete
+      };
+
+      getUserList(obj, nextParams);
+    },
+    err => {
+      http.nlyCheckCode(obj, err);
+      obj.isClickAddOk = false;
+    }
+  );
+};
+
 export default {
   getUserList,
   deleteListUser,
   deleteUser,
   launchUser,
   checkUsername,
-  editorUser
+  editorUser,
+  addCheckUsername,
+  addUser
 };

@@ -668,7 +668,7 @@
                   id="editor-user_level"
                   :valid="valid.levelState"
                   @blur="blurLevelEditor"
-                  trim
+                  :formatter="formatter"
                 ></nly-form-input>
               </nly-form-group>
             </nly-col>
@@ -691,7 +691,7 @@
                   id="editor-user_exp"
                   :valid="valid.expState"
                   @blur="blurExpEditor"
-                  trim
+                  :formatter="formatter"
                 ></nly-form-input>
               </nly-form-group>
             </nly-col>
@@ -734,6 +734,7 @@
                   show-dropdowns
                   :ranges="false"
                   always-show-calendars
+                  auto-apply
                 >
                   <template v-slot:append>
                     <nly-input-group-text>
@@ -921,6 +922,203 @@
           </nly-button>
         </template>
       </nly-modal>
+
+      <nly-modal v-model="addModal" centered hide-header size="lg">
+        <nly-container fluid>
+          <nly-row>
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="用户名"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-username"
+                class="mb-0"
+                :invalid-feedback="addFeedback.usernameInvalid"
+                :valid="addValid.usernameState"
+              >
+                <nly-form-input
+                  size="sm"
+                  v-model="add.username"
+                  type="text"
+                  id="add-username"
+                  :valid="addValid.usernameState"
+                  @blur="blurUsernameAdd"
+                  @input="changeUsernameAdd"
+                ></nly-form-input>
+              </nly-form-group>
+            </nly-col>
+
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="密码"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-password"
+                class="mb-0"
+              >
+                <nly-input-group
+                  size="sm"
+                  :invalid-feedback="addFeedback.passwordInvalid"
+                  :valid="addValid.passwordState"
+                >
+                  <nly-form-input
+                    size="sm"
+                    v-model="add.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    id="add-password"
+                    :valid="addValid.passwordState"
+                    @blur="blurPasswordAdd"
+                  ></nly-form-input>
+                  <nly-input-group-append is-text>
+                    <nly-icon
+                      :icon="
+                        showPassword
+                          ? 'nlyfont nly-icon-eye-off'
+                          : 'nlyfont nly-icon-eye'
+                      "
+                      @click="showPassword = !showPassword"
+                    />
+                  </nly-input-group-append>
+                </nly-input-group>
+              </nly-form-group>
+            </nly-col>
+
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="用户类型"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-usertype"
+                class="mb-0"
+              >
+                <nly-form-select
+                  v-model="add.user_type"
+                  :options="usertypeOptions"
+                  id="add-usertype"
+                  size="sm"
+                >
+                </nly-form-select>
+              </nly-form-group>
+            </nly-col>
+
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="手机号"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-user_phone"
+                class="mb-0"
+                :invalid-feedback="addFeedback.phoneInvalid"
+                :valid="addValid.phoneState"
+              >
+                <nly-form-input
+                  size="sm"
+                  v-model="add.user_phone"
+                  type="tel"
+                  id="add-user_phone"
+                  :valid="addValid.phoneState"
+                  @blur="blurPhoneAdd"
+                  trim
+                  :maxlength="11"
+                ></nly-form-input>
+              </nly-form-group>
+            </nly-col>
+
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="邮箱"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-user_email"
+                class="mb-0"
+                :invalid-feedback="addFeedback.emailInvalid"
+                :valid="addValid.emailState"
+              >
+                <nly-form-input
+                  size="sm"
+                  v-model="add.user_email"
+                  type="email"
+                  id="add-user_email"
+                  :valid="addValid.emailState"
+                  @blur="blurEmailAdd"
+                  trim
+                ></nly-form-input>
+              </nly-form-group>
+            </nly-col>
+
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="用户生日"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-user_exp"
+                class="mb-0"
+              >
+                <nly-form-datepicker
+                  :value="addSelectUserBirthday"
+                  single-date-picker
+                  :locale-data="addBirthDayLocaleData"
+                  @update="addUserBirthdayUpdate"
+                  size="sm"
+                  show-dropdowns
+                  :ranges="false"
+                  always-show-calendars
+                  auto-apply
+                >
+                  <template v-slot:append>
+                    <nly-input-group-text>
+                      <nly-icon icon="nlyfont nly-icon-time" />
+                    </nly-input-group-text>
+                  </template>
+                </nly-form-datepicker>
+              </nly-form-group>
+            </nly-col>
+
+            <nly-col xs="12" sm="6" class="my-1">
+              <nly-form-group
+                label="性别"
+                label-cols-sm="4"
+                label-align-sm="right"
+                label-size="sm"
+                label-for="add-user_gender"
+                class="mb-0"
+              >
+                <nly-form-select
+                  size="sm"
+                  v-model="add.user_gender"
+                  :options="[
+                    { value: null, text: '请选择', disabled: true },
+                    { value: 1, text: '男' },
+                    { value: 2, text: '女' }
+                  ]"
+                  id="add-user_gender"
+                  trim
+                ></nly-form-select>
+              </nly-form-group>
+            </nly-col>
+          </nly-row>
+        </nly-container>
+
+        <template v-slot:modal-footer>
+          <nly-button
+            size="sm"
+            variant="success"
+            @click="submitAddUser"
+            :disabled="addValid.usernameState === 'loading'"
+          >
+            确定
+          </nly-button>
+          <nly-button size="sm" variant="danger" @click="cancelAddUser">
+            取消
+          </nly-button>
+        </template>
+      </nly-modal>
     </nly-card-body>
   </nly-card>
 </template>
@@ -952,6 +1150,7 @@ export default {
       isdeleteOptions: this.$renderContext.userList.isdeleteOptions,
       action: this.$renderContext.action,
       editorModal: false,
+      addModal: false,
       editor: {
         id: undefined,
         username: undefined,
@@ -972,12 +1171,27 @@ export default {
         create_user: undefined,
         update_user: undefined
       },
+      add: {
+        username: undefined,
+        password: undefined,
+        user_type: undefined,
+        user_phone: undefined,
+        user_email: undefined,
+        user_birthday: undefined,
+        user_gender: undefined
+      },
       feedback: {
         usernameInvalid: "",
         phoneInvalid: "",
         emailInvalid: "",
         levelInvalid: "",
         expInvalid: ""
+      },
+      addFeedback: {
+        usernameInvalid: "",
+        phoneInvalid: "",
+        emailInvalid: "",
+        passwordInvalid: ""
       },
       valid: {
         usernameState: "novalid",
@@ -986,12 +1200,25 @@ export default {
         levelState: "novalid",
         expState: "novalid"
       },
+      addValid: {
+        usernameState: "novalid",
+        phoneState: "novalid",
+        emailState: "novalid",
+        passwordState: "novalid"
+      },
       selectUserBirthday: {
         startDate: null,
         endDate: null
       },
+      addSelectUserBirthday: {
+        startDate: null,
+        endDate: null
+      },
       birthDayLocaleData: { firstDay: 1, format: "yyyy-mm-dd" },
-      isClickEditorOk: false
+      addBirthDayLocaleData: { firstDay: 1, format: "yyyy-mm-dd" },
+      isClickEditorOk: false,
+      isClickAddOk: false,
+      showPassword: false
     };
   },
   methods: {
@@ -1009,6 +1236,11 @@ export default {
         this.$refs.selectableTable.selectAllRows();
         this.selectedAllRows = true;
       }
+    },
+
+    // 格式化输入框文本为int
+    formatter(value) {
+      return parseInt(value);
     },
 
     // 编辑用户姓名输入框失去焦点
@@ -1034,9 +1266,28 @@ export default {
       }
     },
 
+    // 新增用户失去焦点
+    blurUsernameAdd() {
+      if (this.add.username === undefined || this.add.username.length === 0) {
+        this.addFeedback.usernameInvalid = "用户名不能为空";
+        this.addValid.usernameState = "invalid";
+      } else {
+        const obj = this;
+        const params = {
+          username: this.add.username
+        };
+        this.$api.HttpsUserList.addCheckUsername(obj, params);
+      }
+    },
+
     // 修改用户名触发
     changeUsernameEditor() {
       this.valid.usernameState = "loading";
+    },
+
+    // 新增用户修改用户名触发
+    changeUsernameAdd() {
+      this.addValid.usernameState = "loading";
     },
 
     // 编辑用户电话输入框失去焦点
@@ -1053,6 +1304,23 @@ export default {
       } else {
         this.feedback.phoneInvalid = "";
         this.valid.phoneState = "novalid";
+      }
+    },
+
+    // 新增用户编辑电话失去角距
+    blurPhoneAdd() {
+      const user_phone = this.add.user_phone;
+      if (user_phone === undefined || user_phone.length === 0) {
+        this.addFeedback.phoneInvalid = "";
+        this.addValid.phoneState = "novalid";
+        return;
+      }
+      if (!/^1[3456789]\d{9}$/.test(user_phone)) {
+        this.addFeedback.phoneInvalid = "手机号码格式不对";
+        this.addValid.phoneState = "invalid";
+      } else {
+        this.addFeedback.phoneInvalid = "";
+        this.addValid.phoneState = "novalid";
       }
     },
 
@@ -1073,6 +1341,23 @@ export default {
       this.valid.emailState = "novalid";
     },
 
+    // 新增用户邮箱失去焦点
+    blurEmailAdd() {
+      const email = this.add.user_email;
+      if (email === undefined || email.length === 0) {
+        this.addFeedback.emailInvalid = "邮箱不能为空";
+        this.addValid.emailState = "invalid";
+        return;
+      }
+      if (!/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(email)) {
+        this.addFeedback.emailInvalid = "邮箱格式不对";
+        this.addValid.emailState = "invalid";
+        return;
+      }
+      this.addFeedback.emailInvalid = "";
+      this.addValid.emailState = "novalid";
+    },
+
     // 编辑用户等级数去焦点
     blurLevelEditor() {
       if (this.editor.user_level >= 1 && this.editor.user_level < 15) {
@@ -1088,10 +1373,12 @@ export default {
     // 编辑用户经验失去焦点
     blurExpEditor() {
       if (this.editor.user_exp >= 0) {
+        console.log(1, this.editor.user_exp);
         this.feedback.expInvalid = "";
         this.valid.expState = "novalid";
         return;
       } else {
+        console.log(2, this.editor.user_exp);
         this.feedback.expInvalid = "经验值应该大于0";
         this.valid.expState = "invalid";
       }
@@ -1116,19 +1403,6 @@ export default {
 
       return true;
     },
-
-    // 异步执行验证函数，防止没有失去焦距直接提交数据
-    // async editorUserValid() {
-    //   await this.blurUsernameEditor();
-    //   await this.blurPhoneEditor();
-    //   await this.blurEmailEditor();
-    //   await this.blurLevelEditor;
-    //   await this.blurExpEditor();
-    //   await this.editorUserFormValid();
-    //   const blurUsernameEditor = await this.blurUsernameEditor();
-
-    //   console.log(blurUsernameEditor);
-    // },
 
     // 提交编辑用户
     submitEditorUser() {
@@ -1157,13 +1431,42 @@ export default {
       this.$api.HttpsUserList.editorUser(obj, params);
     },
 
+    // 提交编辑用户
+    submitAddUser() {
+      const feedback_list = [];
+      Object.values(this.addFeedback).forEach(item => {
+        if (item !== "") {
+          feedback_list.push(item);
+        }
+      });
+
+      if (this.addValid.usernameState !== "novalid") {
+        return;
+      }
+
+      if (feedback_list.length >= 1) {
+        return;
+      }
+
+      if (this.isClickAddOk) {
+        return;
+      }
+
+      this.isClickEditorOk = true;
+      const params = this.add;
+      const obj = this;
+      this.$api.HttpsUserList.addUser(obj, params);
+    },
+
     // 取消编辑用户
     cancelEditorUser() {
       this.editorModal = false;
     },
 
-    // 创建用户
-    goAdd() {},
+    // 取消新增用户
+    cancelAddUser() {
+      this.addModal = false;
+    },
 
     // 编辑用户生日获取值
     userBirthdayUpdate(value) {
@@ -1171,6 +1474,11 @@ export default {
         value.startDate,
         "yyyy-mm-dd"
       );
+    },
+
+    // 新增用户生日获取值
+    addUserBirthdayUpdate(value) {
+      this.add.user_birthday = dataUtil.format(value.startDate, "yyyy-mm-dd");
     },
 
     // 编辑数据
@@ -1201,6 +1509,32 @@ export default {
         endDate: row.item.user_birthday
       };
       this.editorModal = true;
+    },
+
+    // 新增用户密码
+    blurPasswordAdd() {
+      if (this.add.password === undefined || this.add.password.length === 0) {
+        this.addFeedback.passwordInvalid = "密码不能为空";
+        this.addValid.passwordState = "invalid";
+        return;
+      }
+      if (this.add.password.length <= 5) {
+        this.addFeedback.passwordInvalid = "密码至少6位";
+        this.addValid.passwordState = "invalid";
+      } else {
+        this.addFeedback.passwordInvalid = "";
+        this.addValid.passwordState = "novalid";
+      }
+    },
+    // 创建用户
+    goAdd() {
+      this.add.user_type = 1;
+      this.add.user_gender = 1;
+      this.addSelectUserBirthday = {
+        startDate: "2020-10-19",
+        endDate: "2020-10-19"
+      };
+      this.addModal = true;
     },
 
     // 启用用户
@@ -1576,6 +1910,37 @@ export default {
           startDate: null,
           endDate: null
         };
+        this.isClickEditorOk = false;
+      }
+    },
+    addModal(newVal) {
+      if (!newVal) {
+        this.addSelectUserBirthday = {
+          startDate: null,
+          endDate: null
+        };
+        this.addFeedback = {
+          usernameInvalid: "",
+          phoneInvalid: "",
+          emailInvalid: "",
+          passwordInvalid: ""
+        };
+        this.addValid = {
+          usernameState: "novalid",
+          phoneState: "novalid",
+          emailState: "novalid",
+          passwordState: "novalid"
+        };
+        this.add = {
+          username: undefined,
+          password: undefined,
+          user_type: undefined,
+          user_phone: undefined,
+          user_email: undefined,
+          user_birthday: undefined,
+          user_gender: undefined
+        };
+        this.isClickAddOk = false;
       }
     }
   }

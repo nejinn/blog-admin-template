@@ -80,6 +80,12 @@ const renderContext = {
     variant: "success",
     message: "编辑用户成功",
     content: "编辑成功"
+  },
+  addUserContext: {
+    title: "操作成功",
+    variant: "success",
+    message: "新增用户成功",
+    content: "新增成功"
   }
 };
 
